@@ -1,9 +1,11 @@
 #!/bin/bash
 
+cd /Users/nayeem/work/test/overleaf-sync
+
 # Default configuration (override these using environment variables passed to script):
-DEFAULT_GIT_URL=""
-DEFAULT_OVERLEAF_PROJECT=""
-DEFAULT_SESSION=""
+DEFAULT_GIT_URL="https://github.com/hasnatnayeem/thesis-supti.git"
+DEFAULT_OVERLEAF_PROJECT="66c9a8daed576011d349000f"
+DEFAULT_SESSION="s%3A7pDR-nIwLa-pUX0yE9NkBdxAehrRaR7E.oQKFJpKIT5p%2Fdm4379ErW0fFL58%2FhjfwA8wAWD8n%2FZo"
 
 set -e
 
@@ -19,7 +21,7 @@ GIT_URL=$(fallback "$GIT_URL" "$DEFAULT_GIT_URL")
 OVERLEAF_PROJECT=$(fallback "$OVERLEAF_PROJECT" "$DEFAULT_OVERLEAF_PROJECT")
 SESSION=$(fallback "$SESSION" "$DEFAULT_SESSION")
 
-AUTO=false
+AUTO=true
 if [[ "$1" =~ ^.*auto.*$ ]]; then
     echo "Automatic sync enabled."
     AUTO=true
@@ -38,19 +40,19 @@ validate() {
         echo "Please pass a valid OVERLEAF_PROJECT (ID consisting of 24 hex chars)"
         exit 2
     fi
-    if [[ "${SESSION}" =~ ^s%[a-zA-Z0-9\.]{12,}$ ]]; then
-        echo "SESSION: ${SESSION}"
-    else
-        echo "Please pass a valid SESSION (starting with 's%')"
-        exit 3
-    fi
+    # if [[ "${SESSION}" =~ ^s%[a-zA-Z0-9\.]{12,}$ ]]; then
+    #     echo "SESSION: ${SESSION}"
+    # else
+    #     echo "Please pass a valid SESSION (starting with 's%')"
+    #     exit 3
+    # fi
 }
 
 validate
 
 sync() {
-    curl "https://www.overleaf.com/project/${OVERLEAF_PROJECT}/download/zip" -H "origin: https://www.overleaf.com" \
-        -K base.cmdline -H "cookie: overleaf_session2=${SESSION}" --compressed > overleaf-project.zip
+    curl "https://www.hasnatnayeem.com/project/${OVERLEAF_PROJECT}/download/zip" -H "origin: https://www.hasnatnayeem.com" \
+        -K base.cmdline -H "cookie: overleaf.sid=${SESSION}" --compressed > overleaf-project.zip
     if [[ $(stat --printf="%s" overleaf-project.zip) -lt 100 ]]; then
         echo "Warning: Downloaded response (archive) is smaller than excepted."
         if [[ $(cat overleaf-project.zip) == *"Forbidden"* ]]; then
@@ -82,17 +84,17 @@ sync() {
 if [[ $AUTO == true ]]; then
     updates=""
     while true; do
-        new_updates=$(curl "https://www.overleaf.com/project/${OVERLEAF_PROJECT}/updates?min_count=5" -K base.cmdline -H "referer: https://www.overleaf.com/project/${OVERLEAF_PROJECT}" -H "cookie: overleaf_session2=${SESSION}" --compressed --silent)
+        new_updates=$(curl "https://www.hasnatnayeem.com/project/${OVERLEAF_PROJECT}/updates?min_count=5" -K base.cmdline -H "referer: https://www.hasnatnayeem.com/project/${OVERLEAF_PROJECT}" -H "cookie: overleaf.sid=${SESSION}" --compressed --silent)
         if [[ "$updates" == "$new_updates" ]]; then
             echo "No new updates."
         else
             echo "New update(s) found:"
-            echo "${new_updates}"
+            # echo "${new_updates}"
             sync
         fi
-        echo "Sleeping 60 seconds before re-fetching updates..."
+        echo "Sleeping 10 seconds before re-fetching updates..."
         updates=$new_updates
-        sleep 60
+        sleep 10
     done
 else
     sync
