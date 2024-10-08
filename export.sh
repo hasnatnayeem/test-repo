@@ -92,9 +92,9 @@ if [[ $AUTO == true ]]; then
             # echo "${new_updates}"
             sync
         fi
-        echo "Sleeping 10 seconds before re-fetching updates..."
+        echo "Sleeping 60 seconds before re-fetching updates..."
         updates=$new_updates
-        sleep 10
+        sleep 60
     done
 else
     sync
